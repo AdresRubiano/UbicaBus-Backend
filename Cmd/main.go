@@ -22,7 +22,9 @@ func main() {
 
 	// Crear el servicio de usuario
 	userService := application.NewUserService(db)
+	// Crear el servicio de ruta
+	rutaService := application.NewRutaService(db)
 
-	// Iniciar servidor con el servicio de usuario
-	delivery.StartServer(userService)
+	// Iniciar servidor con el servicio de usuario y el servicio de ruta
+	delivery.StartServer(userService, rutaService)
 }

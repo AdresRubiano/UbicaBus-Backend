@@ -14,9 +14,19 @@ type UserHandler struct {
 	UserService *application.UserService
 }
 
+// RutaHandler maneja las peticiones relacionadas con rutas
+type RutaHandler struct {
+	RutaService *application.RutaService
+}
+
 // NewUserHandler crea un nuevo manejador de usuarios
 func NewUserHandler(userService *application.UserService) *UserHandler {
 	return &UserHandler{UserService: userService}
+}
+
+// NewRutaHandler crea un nuevo manejador de rutas
+func NewRutaHandler(rutaService *application.RutaService) *RutaHandler {
+	return &RutaHandler{RutaService: rutaService}
 }
 
 // RegisterUserHandler maneja el registro de un usuario
@@ -45,17 +55,25 @@ func (h *UserHandler) RegisterUserHandler(c *gin.Context) {
 	})
 }
 
-// StartServer inicia el servidor HTTP y registra rutas con Gin
-func StartServer(userService *application.UserService) {
+// GetAllRutasHandler maneja la petición GET para obtener todas las rutas
+func (h *RutaHandler) GetAllRutasHandler(c *gin.Context) {
+	rutas, err := h.RutaService.GetAllRutas(c.Request.Context())
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error al obtener las rutas"})
+		return
+	}
+	c.JSON(http.StatusOK, rutas)
+}
+
+func StartServer(userService *application.UserService, rutaService *application.RutaService) {
 	r := gin.Default()
 
-	// Crear el manejador de usuarios
 	userHandler := NewUserHandler(userService)
+	rutaHandler := NewRutaHandler(rutaService)
 
-	// Registrar rutas
 	r.POST("/register", userHandler.RegisterUserHandler)
+	r.GET("/rutas", rutaHandler.GetAllRutasHandler)
 
-	// Iniciar servidor con Gin
 	fmt.Println("Iniciando servidor en el puerto 8080...")
 	if err := r.Run(":8080"); err != nil {
 		fmt.Println("Error al iniciar el servidor:", err)
